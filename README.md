@@ -1,2 +1,2 @@
-# alunos-api
-API de Gerenciamento de Alunos feita no curso de .NET do Macoratti
+# API de Gerenciamento de Alunos feita no curso de .NET do Macoratti
+
