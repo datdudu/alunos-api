@@ -16,6 +16,7 @@ function App() {
 
   const [data, setData]= useState([]);
   const [modalInclude, setModalInclude] = useState(false);
+  const [modalEdit, setModalEdit] = useState(false);
 
   const [selectedStudent, setSelectedStudent]=useState({
     id: '',
@@ -23,6 +24,12 @@ function App() {
     email: '',
     age: ''
   })
+
+  const selectStudent = (student, option) =>{
+    setSelectedStudent(student);
+    (option === "Edit") && 
+      openCloseModalEdit();
+  }
 
   const handleChange =e =>{
     const {name, value}=e.target;
@@ -37,6 +44,10 @@ function App() {
   
   const openCloseModalInclude=()=>{
     setModalInclude(!modalInclude);
+  }
+
+  const openCloseModalEdit=()=>{
+    setModalEdit(!modalEdit);
   }
 
   const requestGet = async () => {
@@ -61,6 +72,25 @@ function App() {
     })
   }
 
+  const requestPut = async () => {
+    selectedStudent.age = parseInt(selectedStudent.age);
+    await axios.put(baseUrl+"/"+selectedStudent.id, selectedStudent)
+    .then(response=>{
+      var responseData = response.data;
+      var dataAuxiliar = data;
+      dataAuxiliar.map(student=>{
+        if(student.id === selectedStudent.id){
+          student.name = responseData.name;
+          student.email = responseData.email;
+          student.age = responseData.age;
+        }
+      });
+      
+      openCloseModalEdit();
+    }).catch(error=>{
+      console.log(error);
+    })
+  }
   useEffect(()=>{
     requestGet();
   })
@@ -94,8 +124,8 @@ function App() {
               <td>{student.email}</td>
               <td>{student.age}</td>
               <td>
-                <button type="button" className="btn btn-primary">Edit</button> {"  "}
-                <button type="button" className="btn btn-danger">Delete</button>
+                <button type="button" className="btn btn-primary" onClick={()=>selectStudent(student, "Edit")}>Edit</button> {"  "}
+                <button type="button" className="btn btn-danger" onClick={()=>selectStudent(student, "Delete")}>Delete</button>
               </td>
             </tr>
           ))}
@@ -125,6 +155,28 @@ function App() {
         <ModalFooter>
           <button type="button" className="btn btn-primary" onClick={()=>requestPost()}>Add</button>
           <button type="button" className="btn btn-danger"  onClick={()=>openCloseModalInclude()}>Cancel</button>
+        </ModalFooter>
+      </Modal>
+
+      <Modal isOpen={modalEdit}>
+        <ModalHeader>Edit Student</ModalHeader>
+
+        <ModalBody>
+          <div className="form-group">
+            <label>Id: </label>
+            <input type="text" className="form-control" readOnly value = {selectedStudent && selectedStudent.id} /> <br/>
+            <label>Name: </label> <br/>
+            <input type="text" className="form-control" name='name' onChange={handleChange} value = {selectedStudent && selectedStudent.name} /> <br/>
+            <label>Email: </label> <br/>
+            <input type="text" className="form-control" name='email' onChange={handleChange} value = {selectedStudent && selectedStudent.email}/> <br/>
+            <label>Age: </label> <br/>
+            <input type="text" className="form-control" name='age' onChange={handleChange} value = {selectedStudent && selectedStudent.age}/> <br/>
+          </div>
+        </ModalBody>
+
+        <ModalFooter>
+          <button type="button" className="btn btn-primary" onClick={()=>requestPut()}>Edit</button>
+          <button type="button" className="btn btn-danger"  onClick={()=>openCloseModalEdit()}>Cancel</button>
         </ModalFooter>
       </Modal>
     </div>
