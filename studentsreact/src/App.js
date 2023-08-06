@@ -15,8 +15,10 @@ function App() {
   const baseUrl="https://localhost:44357/api/students";
 
   const [data, setData]= useState([]);
+  const [updateData, setUpdateData] = useState(true);
   const [modalInclude, setModalInclude] = useState(false);
   const [modalEdit, setModalEdit] = useState(false);
+  const [modalDelete, setModalDelete] = useState(false);
 
   const [selectedStudent, setSelectedStudent]=useState({
     id: '',
@@ -27,8 +29,8 @@ function App() {
 
   const selectStudent = (student, option) =>{
     setSelectedStudent(student);
-    (option === "Edit") && 
-      openCloseModalEdit();
+    (option === "Edit") ?  
+      openCloseModalEdit() : openCloseModalDelete();
   }
 
   const handleChange =e =>{
@@ -50,6 +52,11 @@ function App() {
     setModalEdit(!modalEdit);
   }
 
+  const openCloseModalDelete =()=>{
+    setModalDelete(!modalDelete);
+  }
+
+
   const requestGet = async () => {
     try {
       const response = await axios.get(baseUrl);
@@ -66,6 +73,7 @@ function App() {
       await axios.post(baseUrl, selectedStudent)
     .then(response=>{
       setData(data.concat(response.data));
+      setUpdateData(true);
       openCloseModalInclude();
     }).catch(error=>{
       console.log(error);
@@ -85,15 +93,30 @@ function App() {
           student.age = responseData.age;
         }
       });
-      
+      setUpdateData(true);
       openCloseModalEdit();
     }).catch(error=>{
       console.log(error);
     })
+  
   }
+  const requestDelete = async () => {
+    await axios.delete(baseUrl+"/"+selectedStudent.id)
+    .then(response=>{
+      setData(data.filter(student=>student.id !== response.data));
+      setUpdateData(true);
+      openCloseModalDelete();
+    }).catch(error=>{
+      console.log(error);
+    })
+  }
+
   useEffect(()=>{
-    requestGet();
-  })
+    if(updateData){
+      requestGet();
+      setUpdateData(false);
+    }
+  },[updateData])
 
 
   return (
@@ -177,6 +200,17 @@ function App() {
         <ModalFooter>
           <button type="button" className="btn btn-primary" onClick={()=>requestPut()}>Edit</button>
           <button type="button" className="btn btn-danger"  onClick={()=>openCloseModalEdit()}>Cancel</button>
+        </ModalFooter>
+      </Modal>
+
+      <Modal isOpen={modalDelete}>
+        <ModalBody>
+          Are you sure you want to delete the student {selectedStudent && selectedStudent.name} ?
+        </ModalBody>
+
+        <ModalFooter>
+          <button type="button" className="btn btn-danger" onClick={()=>requestDelete()}>Yes</button>
+          <button type="button" className="btn btn-secondary" onClick={()=>openCloseModalDelete()}>No</button>
         </ModalFooter>
       </Modal>
     </div>
