@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using StudentsAPI.Models;
 using StudentsAPI.Services;
@@ -7,6 +9,7 @@ namespace StudentsAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class StudentsController : ControllerBase
     {
         private IStudentService _studentService;
